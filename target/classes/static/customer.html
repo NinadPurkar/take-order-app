@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Assign Customer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #fdfbfb, #ebedee);
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #34495e;
+      margin-bottom: 20px;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: inline-block;
+      padding: 30px;
+      width: 300px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #27ae60;
+      color: white;
+    }
+
+    .btn-order {
+      background-color: #2980b9;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>👋 Welcome to the Restaurant</h1>
+  <div class="form-container">
+    <h2 id="tableTitle"></h2>
+    <input type="text" id="name" placeholder="Customer Name" />
+    <input type="text" id="phone" placeholder="Phone Number" />
+    <button onclick="assignCustomer()">Assign Table</button>
+    <div id="nextStep"></div>
+  </div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const tableId = urlParams.get("tableId");
+document.getElementById("tableTitle").textContent = `Table ${tableId}`;
+
+function assignCustomer() {
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+
+  fetch(`/restaurant/api/tables/${tableId}/assign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, phone })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert(`Customer assigned to Table ${tableId}`);
+    document.getElementById("nextStep").innerHTML =
+      `<button class="btn-order" onclick="goToOrder()">Place Order</button>`;
+  });
+}
+
+function goToOrder() {
+  window.location.href = `order.html?tableId=${tableId}`;
+}
+</script>
+</body>
+</html>

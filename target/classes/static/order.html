@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Place Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #fdfbfb, #ebedee);
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    .order-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: inline-block;
+      padding: 30px;
+      width: 400px;
+    }
+
+    select, button {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      font-weight: bold;
+    }
+
+    select {
+      width: 80%;
+      border: 1px solid #ccc;
+    }
+
+    .btn-add {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    .btn-submit {
+      background-color: #2980b9;
+      color: white;
+    }
+
+    .orders-list {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .order-item {
+      background: #f8f9fa;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>🍴 Place Order</h1>
+  <div class="order-container">
+    <h2 id="tableTitle"></h2>
+    <select id="menu"></select>
+    <button class="btn-add" onclick="addItem()">Add Item</button>
+
+    <ul id="orderList"></ul>
+
+    <button class="btn-submit" onclick="submitOrder()">Submit Order</button>
+
+    <div class="orders-list">
+      <h3>Orders for this Table</h3>
+      <div id="orders"></div>
+    </div>
+
+    <!-- Back to Dashboard -->
+    <button style="margin-top:20px; background-color:#8e44ad; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;"
+            onclick="goToDashboard()">⬅ Back to Dashboard</button>
+
+    <!-- Generate Bill (hidden until all delivered) -->
+    <div id="billSection" style="margin-top:20px;"></div>
+  </div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const tableId = urlParams.get("tableId");
+document.getElementById("tableTitle").textContent = `Table ${tableId}`;
+
+let items = [];
+
+function loadMenu() {
+  fetch("/restaurant/api/menu")
+    .then(res => res.json())
+    .then(data => {
+      const menuSelect = document.getElementById("menu");
+      menuSelect.innerHTML = "";
+      data.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = `${item.name} (₹${item.price})`;
+        menuSelect.appendChild(option);
+      });
+    });
+}
+
+function addItem() {
+  const menu = document.getElementById("menu");
+  items.push(parseInt(menu.value));
+  const list = document.getElementById("orderList");
+  const li = document.createElement("li");
+  li.textContent = menu.options[menu.selectedIndex].text;
+  list.appendChild(li);
+}
+
+function submitOrder() {
+  fetch(`/restaurant/api/orders?tableId=${tableId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(items)
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Order placed!");
+    items = [];
+    document.getElementById("orderList").innerHTML = "";
+    loadOrders();
+  });
+}
+
+function markDelivered(orderId) {
+  fetch(`/restaurant/api/orders/${orderId}/deliver`, { method: "PUT" })
+    .then(() => {
+      alert("Order marked as delivered!");
+      loadOrders();
+    });
+}
+
+function generateBill() {
+  fetch(`/restaurant/api/bills/${tableId}`, { method: "GET" })
+    .then(res => res.json())
+    .then(bill => {
+      const billSection = document.getElementById("billSection");
+      billSection.innerHTML = `
+        <h3>Bill Details</h3>
+        <p><strong>Total Amount:</strong> ₹${bill.totalAmount}</p>
+        <button style="background-color:#27ae60; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;"
+                onclick="billPaid()">Bill Paid</button>
+      `;
+    });
+}
+
+function billPaid() {
+  fetch(`/restaurant/api/tables/${tableId}/free`, { method: "PUT" })
+    .then(() => {
+      alert("Bill paid! Table is now available.");
+      window.location.href = "index.html";
+    });
+}
+
+function loadOrders() {
+  fetch(`/restaurant/api/orders/${tableId}`)
+    .then(res => res.json())
+    .then(data => {
+      const ordersDiv = document.getElementById("orders");
+      ordersDiv.innerHTML = "";
+      let allDelivered = true;
+
+      data.forEach(order => {
+        const div = document.createElement("div");
+        div.className = "order-item";
+        div.textContent = order.items.map(i => `${i.name} (₹${i.price})`).join(", ")
+                        + " - " + order.status;
+
+        if (order.status === "PLACED") {
+          allDelivered = false;
+          const btn = document.createElement("button");
+          btn.textContent = "Mark Delivered";
+          btn.style.marginLeft = "10px";
+          btn.onclick = () => markDelivered(order.id);
+          div.appendChild(btn);
+        }
+
+        ordersDiv.appendChild(div);
+      });
+
+      // Show Generate Bill button only if all orders delivered
+      const billSection = document.getElementById("billSection");
+      billSection.innerHTML = "";
+      if (data.length > 0 && allDelivered) {
+        const billBtn = document.createElement("button");
+        billBtn.textContent = "Generate Bill";
+        billBtn.style.backgroundColor = "#e67e22";
+        billBtn.style.color = "white";
+        billBtn.style.padding = "10px";
+        billBtn.style.border = "none";
+        billBtn.style.borderRadius = "5px";
+        billBtn.style.cursor = "pointer";
+        billBtn.onclick = generateBill;
+        billSection.appendChild(billBtn);
+      }
+    });
+}
+
+function goToDashboard() {
+  window.location.href = "index.html";
+}
+
+// Initialize
+loadMenu();
+loadOrders();
+</script>
+</body>
+</html>
