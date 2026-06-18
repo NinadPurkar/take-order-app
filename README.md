@@ -1,59 +1,87 @@
-# 🍽️ FineDine - Restaurant Order Management System
+markdown
+# 🍽️ Restaurant Management App (Version 1)
 
-A modern web application for managing restaurant orders, built with **Java Spring Boot**, **MySQL**, and **Thymeleaf**.
+## 📌 Project Overview
+This is **Version 1** of a Restaurant Management System built with **Spring Boot (backend)** and **HTML/CSS/JavaScript (frontend)**.  
+It demonstrates a complete flow from table assignment to order placement, delivery, billing, and freeing tables.
 
-## 🎯 Project Overview
+---
 
-FineDine is a comprehensive restaurant order management system designed to streamline the process of taking orders from multiple tables simultaneously. With support for multi-tab sessions, real-time order updates, and automated bill generation, FineDine helps restaurants operate more efficiently.
+## 🚀 Features
+- **Dashboard (index.html)**  
+  View all tables with status (Available / Occupied).  
+  Assign customers or place orders directly.
 
-## ✨ Features
+- **Customer Page (customer.html)**  
+  Assign customer details (name, phone) to a table.
 
-- **🔐 User Authentication** - Secure login with JWT tokens
-- **📋 Multi-Table Management** - Serve multiple tables simultaneously in separate browser tabs
-- **🛒 Real-time Cart Updates** - AJAX-based shopping cart without page reloads
-- **📱 Responsive Design** - Works on desktop, tablet, and mobile devices
-- **🧾 Automated Bill Generation** - Instant bill calculation with tax and service charges
-- **💳 Payment Integration Ready** - Support for multiple payment methods
-- **☁️ Cloud-Ready** - Easily deployable to AWS, Heroku, or Google Cloud
+- **Order Page (order.html)**  
+  - Fetch menu dynamically from backend (`/api/menu`).  
+  - Place orders for a table.  
+  - View all orders placed.  
+  - Mark orders as delivered.  
+  - Generate bill with total amount.  
+  - Mark bill as paid → frees the table.
+
+---
 
 ## 🛠️ Tech Stack
+- **Backend**: Spring Boot, REST APIs
+- **Frontend**: HTML, CSS, JavaScript (served via Spring Boot `static/`)
+- **Database**: (Your choice, e.g., MySQL/PostgreSQL)
+- **Tools**: Git, Postman (for API testing)
 
-### Backend
-- **Java 17** - Programming language
-- **Spring Boot 3.2** - Web framework
-- **Spring Security** - Authentication & Authorization
-- **Spring Data JPA** - Database ORM
-- **JWT (JSON Web Tokens)** - Token-based authentication
-- **Maven** - Build automation tool
+---
 
-### Frontend
-- **Thymeleaf** - Server-side HTML templating
-- **HTML5** - Markup language
-- **CSS3** - Styling
-- **JavaScript (Vanilla)** - Frontend interactivity
-- **AJAX/Fetch API** - Asynchronous HTTP requests
+## 📂 Project Structure
+restaurant-app/
+├── src/main/java/...        # Spring Boot backend code
+├── src/main/resources/
+│    ├── static/             # Frontend pages
+│    │    ├── index.html
+│    │    ├── customer.html
+│    │    ├── order.html
+│    │    └── (admin.html planned for v2)
+│    └── application.properties
+└── pom.xml                  # Maven build file
 
-### Database
-- **MySQL 8.0+** - Relational database
+Code
 
-### Deployment
-- **Docker** - Containerization
-- **Git** - Version control
+---
 
-## 📋 Prerequisites
+## 📖 How to Run
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/<your-username>/restaurant-app-v1.git
+Navigate into the project folder:
 
-Before you begin, ensure you have installed:
+bash
+cd restaurant-app-v1
+Run the Spring Boot app:
 
-- **Java JDK 17 or higher** ([Download](https://www.oracle.com/java/technologies/downloads/))
-- **Apache Maven 3.8+** ([Download](https://maven.apache.org/download.cgi))
-- **MySQL 8.0+** ([Download](https://www.mysql.com/downloads/mysql/))
-- **Git** ([Download](https://git-scm.com/))
-- **Visual Studio Code** ([Download](https://code.visualstudio.com/))
+bash
+mvn spring-boot:run
+Open in browser:
 
-### Verify Installation
+Dashboard → http://localhost:8080/index.html
 
-```bash
-java -version
-mvn -version
-mysql --version
-git --version
+Customer → http://localhost:8080/customer.html?tableId=1
+
+Order → http://localhost:8080/order.html?tableId=1
+
+🏷️ Future Enhancements (Version 2)
+Admin Page with centralized controls.
+
+Itemized bill printing with customer details.
+
+Authentication & role-based access (Admin vs Waiter).
+
+More polished UI with reusable components.
+
+👨‍💻 Author
+Ninad Purkar  
+Java Backend Developer | Payments & Real-Time Systems
+
+Code
+
+---
