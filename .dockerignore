@@ -1,0 +1,21 @@
+# Ignore everything in target except the final JAR
+target/*
+!target/*.jar
+
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore IDE/project files
+*.iml
+.idea/
+.vscode/
+
+# Ignore logs and temp files
+*.log
+*.tmp
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
