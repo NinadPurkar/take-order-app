@@ -20,4 +20,17 @@ public class MenuService
     {
         return menuItemRepository.findAll();
     }
+
+     public MenuItem addMenuItem(MenuItem item) {
+        return menuItemRepository.save(item);
+    }
+
+    public MenuItem updateMenuItem(Integer id, MenuItem item) {
+        item.setId(id);
+        return menuItemRepository.save(item);
+    }
+
+    public void deleteMenuItem(Integer id) {
+        menuItemRepository.deleteById(id);
+    }
 }

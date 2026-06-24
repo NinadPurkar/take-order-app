@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Menu Management</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 60%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    form { margin-bottom: 20px; }
+    button { margin: 2px; }
+  </style>
+</head>
+<body>
+  <h2>Manage Menu Items</h2>
+
+  <!-- Add new item -->
+  <form id="addForm">
+    Name: <input type="text" id="name" required>
+    Price: <input type="number" id="price" required>
+    <button type="submit">Add Item</button>
+  </form>
+
+  <h3>Current Menu</h3>
+  <table id="menuTable">
+    <tr><th>ID</th><th>Name</th><th>Price</th><th>Actions</th></tr>
+  </table>
+
+  <script>
+    const baseUrl = "/restaurant/api/menu";
+
+    async function loadMenu() {
+      const res = await fetch(baseUrl);
+      const items = await res.json();
+      const table = document.getElementById("menuTable");
+      table.innerHTML = "<tr><th>ID</th><th>Name</th><th>Price</th><th>Actions</th></tr>";
+      items.forEach(item => {
+        table.innerHTML += `
+          <tr>
+            <td>${item.id}</td>
+            <td>${item.name}</td>
+            <td>${item.price}</td>
+            <td>
+              <button onclick="deleteItem(${item.id})">Delete</button>
+              <button onclick="editItem(${item.id}, '${item.name}', ${item.price})">Edit</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    document.getElementById("addForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const price = document.getElementById("price").value;
+      await fetch(baseUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, price })
+      });
+      loadMenu();
+    };
+
+    async function deleteItem(id) {
+      await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
+      loadMenu();
+    }
+
+    async function editItem(id, oldName, oldPrice) {
+      const newName = prompt("Enter new name:", oldName);
+      const newPrice = prompt("Enter new price:", oldPrice);
+      if (newName && newPrice) {
+        await fetch(`${baseUrl}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newName, price: parseInt(newPrice) })
+        });
+        loadMenu();
+      }
+    }
+
+    loadMenu();
+  </script>
+</body>

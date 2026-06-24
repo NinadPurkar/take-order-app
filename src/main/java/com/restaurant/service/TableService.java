@@ -39,6 +39,7 @@ public class TableService
         Table table = TableManager.getTableById(tableId);
         if (table != null && "Occupied".equals(table.getStatus()))
         {
+            // table.getOrders().clear();
             table.setCustomer(null);
             table.setStatus("Available");
             return table;
